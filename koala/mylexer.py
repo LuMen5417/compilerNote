@@ -1,6 +1,6 @@
 import ply.lex as lex
 
-tokens = (
+tokens = [ 
     'number',
     'plus',
     'minus',
@@ -13,11 +13,9 @@ tokens = (
     'greater',
     'less',
     'colon',
-    'pound',
     'dot',
-    'space',
-    'valite'
-)
+    'id'
+]
 
 t_plus = r'\+'
 t_minus = r'-'
@@ -30,17 +28,24 @@ t_equal = r'=='
 t_greater = r'>'
 t_less = r'<'
 t_colon = r':'
-t_pound = r'\#'
 t_dot = r'\.'
-t_ignore = r'#.*'
-t_space = r'\s+'
-t_valite = r'[a-zA-Z\_]([a-z]|[A-Z]|[0-9]|(\_))*'
+t_ignore = r' \t'
+t_ignore_comment = r'\#.*'
 
+reserved = {
+    'if': 'if',
+    'else': 'else',
+    'while': 'while',
+    'continue': 'continue',
+    'break': 'break',
+    'import': 'import',
+}
+
+tokens = tokens + list(reserved.values())
 
 def t_number(t):
     r'\d+'
     t.value = int(t.value)
-    return t
 
 
 def t_newline(t):
@@ -52,10 +57,18 @@ def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
+def t_id(t):
+    r'[a-zA-Z\_][a-zA-Z_0-9]*'
+    t.type = reserved.get(t.value, 'id')
+    return t
+
 
 lexer = lex.lex()
 
-data = '''_a2 = 3 +  4 *10+20*13'''
+data = '''
+            import sys
+            if a=1:
+            _a2 = 3 +  4 *10+20*13'''
 
 lexer.input(data)
 
